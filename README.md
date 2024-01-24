@@ -55,4 +55,4 @@ Where:
 
 ## Acknowledgment
 
-This repository was based from (and would not be possible without) [https://github.com/alexhernandezgarcia/gflownet/](github.com/alexhernandezgarcia/gflownet), a library for all of your GFlowNet needs.
+This repository was based from (and would not be possible without) [github.com/alexhernandezgarcia/gflownet](https://github.com/alexhernandezgarcia/gflownet/), a library for all of your GFlowNet needs.
