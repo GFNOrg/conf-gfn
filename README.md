@@ -31,7 +31,7 @@ python -m pip install -U --no-deps pytorch3d==0.3.0
 Example command to train a Conf-GFlowNet on the specific molecule `CC(C)Cc1ccc(cc1)[C@@H](C)C(=O)O` and TorchANI as the energy proxy estimator for the reward:
 
 ```bash
-HYDRA_FULL_ERROR=1 python main.py +experiments=ai4mat23/mlp_torchani device=cpu 'env.smiles="CC(C)Cc1ccc(cc1)[C@@H](C)C(=O)O"' proxy=conformers/torchani logger.do.online=True user.logdir.root=logs
+python main.py +experiments=ai4mat23/mlp_torchani device=cpu 'env.smiles="CC(C)Cc1ccc(cc1)[C@@H](C)C(=O)O"' proxy=conformers/torchani logger.do.online=True user.logdir.root=logs
 ```
 
 Where:  
