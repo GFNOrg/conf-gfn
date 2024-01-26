@@ -1,39 +1,59 @@
-# GFlowNet
+# Conf-GFlowNet
 
-This repository implements GFlowNets, generative flow networks for probabilistic modelling, on PyTorch. A design guideline behind this implementation is the separation of the logic of the GFlowNet agent and the environments on which the agent can be trained on. In other words, this implementation should allow its extension with new environments without major or any changes to to the agent. Another design guideline is flexibility and modularity. The configuration is handled via the use of [Hydra](https://hydra.cc/docs/intro/).
+This repository implements the experiments described in [Towards equilibrium molecular conformation generation with GFlowNets](https://arxiv.org/abs/2310.14782) by Volokhova & Koziarski et al.
 
 ## Installation
 
-### pip
-
 ```bash
-python -m pip install --upgrade https://github.com/alexhernandezgarcia/gflownet/archive/main.zip
+conda create -n confgfn python=3.8
+source activate confgfn
+
+conda install mamba -n base -c conda-forge
+
+mamba install xtb -c conda-forge
+mamba install tblite -c conda-forge
+mamba install tblite-python -c conda-forge
+
+# Update pip
+python -m pip install --upgrade pip
+# Install PyTorch family
+python -m pip install torch==2.0.1+cu117 --extra-index-url https://download.pytorch.org/whl/cu117
+python -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.0.0+cu117.html
+# Install DGL (see https://www.dgl.ai/pages/start.html)
+python -m pip install dgl -f https://data.dgl.ai/wheels/cu117/repo.html
+# Requirements to run
+python -m pip install numpy pandas hydra-core tqdm torchtyping six xtb scikit-learn torchani==2.2.3 rdkit wurlitzer wandb matplotlib dgllife ultranest
+python -m pip install -U --no-deps pytorch3d==0.3.0
 ```
 
-## How to train a GFlowNet model
+## Training
 
-To train a GFlowNet model with the default configuration, simply run
-
-```bash
-python main.py user.logdir.root=<path/to/log/files/>
-```
-
-Alternatively, you can create a user configuration file in `config/user/<username>.yaml` specifying a `logdir.root` and run
+Example command to train a Conf-GFlowNet on the specific molecule `CC(C)Cc1ccc(cc1)[C@@H](C)C(=O)O` and TorchANI as the energy proxy estimator for the reward:
 
 ```bash
-python main.py user=<username>
+python main.py +experiments=ai4mat23/mlp_torchani device=cpu 'env.smiles="CC(C)Cc1ccc(cc1)[C@@H](C)C(=O)O"' proxy=conformers/torchani logger.do.online=True user.logdir.root=logs
 ```
 
-Using Hydra, you can easily specify any variable of the configuration in the command line. For example, to train GFlowNet with the trajectory balance loss, on the continuous torus (`ctorus`) environment and the corresponding proxy:
+Where:  
 
-```bash
-python main.py gflownet=trajectorybalance env=ctorus proxy=torus
+- `+experiments=ai4mat23/mlp_torchani` points to a config file with hyperparameters defined (see [here](https://github.com/GFNOrg/conf-gfn/blob/main/config/experiments/ai4mat23/mlp_torchani.yaml)).  
+- `device=cpu` specifies the device (`cpu` or `cuda`).  
+- `'env.smiles="CC(C)Cc1ccc(cc1)[C@@H](C)C(=O)O"'` specifies the SMILES of a molecule. Alternatively, you can use `env.smiles=ID`, e.g. `env.smiles=0`, to run on one of the [predefined molecules](https://github.com/GFNOrg/conf-gfn/blob/main/gflownet/envs/conformers/conformer.py) used in the experiments described in the paper.  
+- `proxy=conformers/torchani` denotes the proxy model: either `conformers/tblite` for GFN2-xTB, `conformers/xtb` for GFN-FF, or `conformers/torchani` for TorchANI.  
+- `logger.do.online=True` whether to log the results to wandb.  
+- `user.logdir.root=logs` points to a directory in which log files will be stored.  
+
+## Citation
+
+```bibtex
+@article{volokhova2023towards,
+  title={Towards equilibrium molecular conformation generation with GFlowNets},
+  author={Volokhova, Alexandra and Koziarski, Micha{\l} and Hern{\'a}ndez-Garc{\'\i}a, Alex and Liu, Cheng-Hao and Miret, Santiago and Lemos, Pablo and Thiede, Luca and Yan, Zichao and Aspuru-Guzik, Al{\'a}n and Bengio, Yoshua},
+  journal={arXiv preprint arXiv:2310.14782},
+  year={2023}
+}
 ```
 
-The above command will overwrite the `env` and `proxy` default configuration with the configuration files in `config/env/ctorus.yaml` and `config/proxy/torus.yaml` respectively.
+## Acknowledgment
 
-Hydra configuration is hierarchical. For instance, a handy variable to change while debugging our code is to avoid logging to wandb. You can do this by setting `logger.do.online=False`.
-
-## Logging to wandb
-
-The repository supports logging of train and evaluation metrics to [wandb.ai](https://wandb.ai), but it is disabled by default. In order to enable it, set the configuration variable `logger.do.online` to `True`.
+This repository is based on (and would not be possible without) [github.com/alexhernandezgarcia/gflownet](https://github.com/alexhernandezgarcia/gflownet/), a library for all of your GFlowNet needs.
