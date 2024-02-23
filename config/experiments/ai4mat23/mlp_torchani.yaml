@@ -66,4 +66,4 @@ logger:
 # Hydra
 hydra:
   run:
-    dir: ${user.logdir.root}/molecule/${now:%Y-%m-%d_%H-%M-%S}
+    dir: ${user.logdir.root}/molecule/${oc.env:SLURM_JOB_ID}-${now:%Y-%m-%d_%H-%M-%S}
